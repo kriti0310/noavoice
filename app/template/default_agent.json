@@ -1,0 +1,23 @@
+{
+  "first_message": "Hello! How can I assist you today?",
+  "end_call_message": "Thank you for your time. Have a great day!",
+  "system_prompt": "You are a helpful AI assistant. Be polite, professional, and concise.",
+
+  "language": "EN",
+  "voice_provider": "elevenlabs",
+  "voice_id": "Xb7hH8MSUJpSbSDYk0k2",
+  "voice_name": "Default Voice",
+
+  "multi_lingual": false,
+  "is_custom_voice": false,
+  "voice_recording_enabled": false,
+
+  "voice_stability": null,
+  "voice_similarity_boost": null,
+  "voice_style": null,
+  "test_message": "Hello this is a voice test.",
+
+  "is_published": false,
+  "is_deleted": false,
+  "is_template": false
+}
