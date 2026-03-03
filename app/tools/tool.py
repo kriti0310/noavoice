@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 from app.integrations.calcom.client import calcom_client
 from app.config.database import AsyncSessionLocal
-from app.models.booking import Booking, BookingStatus
+from app.models.calcom_model import Booking, BookingStatus
 
 logger = logging.getLogger(__name__)
 

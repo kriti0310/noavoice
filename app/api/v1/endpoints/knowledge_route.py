@@ -62,3 +62,25 @@ async def get_knowledge_stats(
     current_user = Depends(get_current_user)
 ):
     return await KnowledgeService(db).get_stats(current_user)
+
+async def get_by_id(self, file_id, current_user):
+    query = select(Knowledge).where(
+        Knowledge.id == file_id,
+        Knowledge.company_id == current_user.company_id   # important for security
+    )
+
+    result = await self.db.execute(query)
+    knowledge = result.scalar_one_or_none()
+
+    if not knowledge:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return knowledge
+    
+@router.get("/{file_id}/view")
+async def view_knowledge(
+    file_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    return await KnowledgeService(db).view_knowledge(file_id, current_user)

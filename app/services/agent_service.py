@@ -32,6 +32,7 @@ class AgentService:
         agent.language = defaults["language"]
         agent.voice_provider = defaults["voice_provider"]
         agent.voice_id = defaults["voice_id"]
+        agent.voice_name = defaults["voice_name"]
         agent.multi_lingual = defaults["multi_lingual"]
 
         await self.db.commit()

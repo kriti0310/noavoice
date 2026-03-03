@@ -1,12 +1,13 @@
 import os
 import uuid
 import requests
-
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
 from app.services.embedding_service import EmbeddingService
 from app.repository.knowledge_repository import KnowledgeRepository
 from app.repository.file_repository import FileRepository
 from app.models.file import File
-
+from sqlalchemy import select
 
 class KnowledgeService:
 
@@ -29,8 +30,12 @@ class KnowledgeService:
             if file:
                 file_path = f"uploads/{file_id}_{file.filename}"
 
+                content = await file.read()
+                file_size = len(content)
+                mimetype = file.content_type
+
                 with open(file_path, "wb") as buffer:
-                    buffer.write(await file.read())
+                    buffer.write(content)
 
                 original_name = file.filename
 
@@ -38,6 +43,10 @@ class KnowledgeService:
             else:
                 response = requests.get(url)
                 response.raise_for_status()
+
+                content = response.content
+                file_size = len(content)
+                mimetype = response.headers.get("Content-Type", "text/plain")
 
                 file_path = f"uploads/{file_id}.txt"
 
@@ -52,6 +61,8 @@ class KnowledgeService:
                 user_id=current_user.id,
                 original_name=original_name,
                 storage_path=file_path,
+                file_size=file_size,        
+                mimetype=mimetype,         
                 url=url if url else None,
                 status="processing"
             )
@@ -70,8 +81,8 @@ class KnowledgeService:
             # -------- UPDATE STATUS --------
             await self.file_repo.update_status(file_record, "ready")
 
-            # -------- CLEANUP --------
-            os.remove(file_path)
+        #     # -------- CLEANUP --------
+        #     os.remove(file_path)
 
             return {
                 "status": True,
@@ -89,11 +100,11 @@ class KnowledgeService:
 
             raise e
 
-        finally:
-            # -------- AUTO DELETE LOCAL FILE --------
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
-                print("Local file deleted:", file_path)
+        # finally:
+        #     # -------- AUTO DELETE LOCAL FILE --------
+        #     if file_path and os.path.exists(file_path):
+        #         os.remove(file_path)
+        #         print("Local file deleted:", file_path)
 
     async def list_knowledge(
         self,
@@ -138,14 +149,11 @@ class KnowledgeService:
         }
     async def delete_knowledge(self, file_id, current_user):
 
-        file = await self.file_repo.get_by_id(file_id)
+        file = await self.file_repo.get_by_id(file_id=file_id,user_id=current_user.id)
 
         if not file:
             raise ValueError("File not found")
-
-        if file.user_id != current_user.id:
-            raise ValueError("Unauthorized")
-
+        
         # delete embeddings first
         await self.repo.delete_by_file_id(file_id)
 
@@ -174,3 +182,24 @@ class KnowledgeService:
                 "storage_used_mb": round(storage / (1024 * 1024), 2)
             }
         }
+
+    async def view_knowledge(self, file_id, current_user):
+
+        file = await self.file_repo.get_by_id(
+            file_id=file_id,
+            user_id=current_user.id
+        )
+
+        if not file:
+            raise HTTPException(status_code=404, detail="File not found")
+
+        if not os.path.exists(file.storage_path):
+            raise HTTPException(status_code=404, detail="Physical file missing")
+
+        return FileResponse(
+            path=file.storage_path,
+            media_type=file.mimetype,
+            headers={
+                "Content-Disposition": f'inline; filename="{file.original_name}"'
+    }
+        )

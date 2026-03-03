@@ -18,10 +18,13 @@ class FileRepository:
         await self.db.commit()
 
      
-    async def get_by_id(self, file_id: UUID):
-        result = await self.db.execute(
-            select(File).where(File.id == file_id)
-        )
+    async def get_by_id(self, file_id: UUID, user_id: UUID | None = None):
+        query = select(File).where(File.id == file_id)
+
+        if user_id:
+            query = query.where(File.user_id == user_id)
+
+        result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
     # ✅ ADD THIS (if not already)

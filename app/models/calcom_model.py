@@ -1,10 +1,16 @@
 import uuid
-from sqlalchemy import Column, String, Date, Time, Text, DateTime
+from sqlalchemy import Column, String, Date, Time, Text, DateTime,Enum
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from app.config.database import Base
+import enum
 
-
+class BookingStatus(str, enum.Enum):
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    CANCELLED = "cancelled"
+    RESCHEDULED = "rescheduled" 
+    
 class Booking(Base):
     __tablename__ = "bookings"
 

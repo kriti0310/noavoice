@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     CALCOM_EVENT_TYPE_ID: int
     CALCOM_BASE_URL: str = "https://api.cal.com/v2"
     CALCOM_API_VERSION: str = "2024-08-13"
+    CALCOM_TIMEOUT: int = 30
     
     # Neon PostgreSQL
     DATABASE_URL: str

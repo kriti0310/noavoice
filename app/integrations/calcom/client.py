@@ -98,11 +98,7 @@ class CalComClient:
         res   = await self._request("GET", "/slots", params=params, headers=self._slot_headers)
         slots = res.get("data", {}).get("slots", {})
 
-        return [
-            s["time"]
-            for day in slots.values()
-            for s in day
-        ]
+        return {"status": "success", "data": slots}
 
     # ─── Bookings ─────────────────────────────────────────────────────────────
 
