@@ -38,7 +38,7 @@ async def root():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["https://noavoice.onrender.com"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,7 +47,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     same_site="none",
-    https_only=False,  # True in production with HTTPS
+    https_only=True,  # True in production with HTTPS
 )
 app.include_router(router)
 
