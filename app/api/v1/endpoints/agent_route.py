@@ -89,6 +89,24 @@ async def get_agent_internal(
             status=True,
             message="Agent fetched",
             data={
-            "assistant": result
+        "assistant": {
+            "id": result.id,
+            "company_id": result.user_id,
+            "name": result.name,
+            "description": result.description,
+            "system_prompt": result.system_prompt,
+            "language": result.language,
+            "voice": result.voice_id,
+            "multi_lingual_enabled": result.multi_lingual,
+            "first_message": result.first_message,
+            "first_message_mode": "assistant-speaks-first",
+            "end_call_message": result.end_call_message,
+            "end_call_function_enabled": False,
+            "recording_enabled": result.voice_recording_enabled,
+            "timezone": result.timezone,
+            "created_at": result.created_at,
+            "detect_caller_number": False
     }
+}
+
         )
