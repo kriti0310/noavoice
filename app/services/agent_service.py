@@ -42,9 +42,9 @@ class AgentService:
 
         return {
             "status": True,
-            "message": "",
+            "message": "Agent created successfully",
             "data": {
-                "assistant": agent
+                "agent": agent
             }
         }
 

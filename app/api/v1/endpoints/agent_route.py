@@ -3,14 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from app.config.database import get_db
 from app.services.agent_service import AgentService
-from app.schemas.agent_schema import AgentCreate, AgentUpdate, AgentResponse ,SingleAgentData, AgentListData
+from app.schemas.agent_schema import AgentCreate, AgentUpdate, CreateAgentData ,SingleAgentData, AgentListData
 from app.utils.dependencies import get_current_user
 from app.schemas.response import APIResponse
 import os
 router = APIRouter(prefix="/agents", tags=["Agents"])
 
 
-@router.post("/create",response_model=APIResponse[SingleAgentData])
+@router.post("/create",response_model=APIResponse[CreateAgentData])
 async def create_agent(payload: AgentCreate,db:
     AsyncSession = Depends(get_db),user=Depends(get_current_user)):
     service = AgentService(db)

@@ -43,7 +43,9 @@ class AgentResponse(BaseModel):
 
     created_at: datetime
     timezone: str
-
+    
+class CreateAgentData(BaseModel):
+    agent: AgentResponse
     class Config:
         from_attributes = True
 
