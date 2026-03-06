@@ -19,7 +19,7 @@ async def google_login(request: Request):
     Redirects the user to Google's consent screen.
     """
     #redirect_uri = request.url_for("google_callback")
-    redirect_uri = f"{os.getenv('BASE_URL')}/auth/google/callback"
+    redirect_uri = "https://noavoice-backend.onrender.com/auth/google/callback"
     print(f"DEBUG redirect_uri: {redirect_uri}") 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
