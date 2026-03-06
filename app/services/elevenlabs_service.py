@@ -13,13 +13,30 @@ class ElevenLabsService:
             "Content-Type": "application/json"
         }
         print("LOADED KEY:", self.api_key)
+        
     def get_voices(self):
         response = requests.get(
             f"{self.BASE_URL}/voices",
             headers=self.headers
         )
-        return response.json()
-    
+
+        data = response.json()
+
+        voices = []
+
+        for voice in data.get("voices", []):
+            voices.append({
+                "voice_id": voice.get("voice_id"),
+                "name": voice.get("name"),
+                "gender": voice.get("labels", {}).get("gender"),
+                "accent": voice.get("labels", {}).get("accent"),
+                "age": voice.get("labels", {}).get("age"),
+                "description": voice.get("description"),
+                "preview_url": voice.get("preview_url")
+            })
+
+        return {"voices": voices}
+        
 
     def text_to_speech(self, voice_id: str, text: str) -> bytes:
 

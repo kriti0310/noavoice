@@ -25,7 +25,7 @@ class CalComClient:
         # Slots endpoint requires a different API version
         self._slot_headers = {
             **self._base_headers,
-            "cal-api-version": "2024-09-04",
+            "cal-api-version": "2024-08-13",
         }
 
     # ─── Core Request ─────────────────────────────────────────────────────────
@@ -82,20 +82,20 @@ class CalComClient:
         """
         Get available time slots.
         Args:
-            start_date: "2024-08-13" (YYYY-MM-DD)
-            end_date:   "2024-08-14" (YYYY-MM-DD)
+            "startTime":   f"{start_date}T00:00:00Z",  
+            "endTime":     f"{end_date}T00:00:00Z",
             timezone:   "Asia/Kolkata"
         Returns:
             List of available ISO time strings
         """
         params = {
             "eventTypeId": self.event_type_id,
-            "start":       start_date,
-            "end":         end_date,
+            "startTime":   f"{start_date}T00:00:00Z",  # ← startTime not start
+            "endTime":     f"{end_date}T00:00:00Z",
             "timeZone":    timezone,
         }
 
-        res   = await self._request("GET", "/slots", params=params, headers=self._slot_headers)
+        res   = await self._request("GET", "/slots/available", params=params, headers=self._slot_headers)
         slots = res.get("data", {}).get("slots", {})
 
         return {"status": "success", "data": slots}

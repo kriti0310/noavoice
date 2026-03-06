@@ -1,35 +1,45 @@
 import uuid
-from sqlalchemy import Column, String, Date, Time, Text, DateTime,Enum
+import enum
+from sqlalchemy import Column, String, DateTime, Integer, Text, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from app.config.database import Base
-import enum
+
 
 class BookingStatus(str, enum.Enum):
     PENDING = "pending"
-    CONFIRMED = "confirmed"
+    ACCEPTED = "accepted"
     CANCELLED = "cancelled"
-    RESCHEDULED = "rescheduled" 
-    
+    RESCHEDULED = "rescheduled"
+
+
 class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
+    calcom_booking_id = Column(Integer)
+    booking_uid = Column(String, unique=True)
+
     name = Column(String)
     email = Column(String)
     phone = Column(String)
 
-    purpose = Column(Text)
+    timezone = Column(String)
 
-    appointment_date = Column(Date)
-    appointment_time = Column(Time)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
 
-    booking_uid = Column(String, unique=True)
+    event_type_id = Column(Integer)
+    duration_minutes = Column(Integer)
 
-    status = Column(String)
+    status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
 
-    rescheduled_from = Column(String, nullable=True)
+    notes = Column(Text)
+
+
+    cancellation_reason = Column(Text)
+    rescheduling_reason = Column(Text)
 
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

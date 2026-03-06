@@ -81,7 +81,7 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
             "sub": str(user.id),
             "email": user.email,
             "provider": "google"
-            }
+            }   
         )
 
     #response=RedirectResponse(url="http://localhost:3000/agents")

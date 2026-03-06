@@ -20,7 +20,12 @@ pydantic==2.12.5
 pydantic-settings==2.13.0
 pydantic_core==2.41.5
 python-dotenv==1.2.1
+pytz==2025.1
+python-dateutil==2.9.0.post0
 python-jose[cryptography]==3.3.0
+pipecat-ai[deepgram]==0.0.104 
+pipecat-ai[cartesia]==0.0.104 
+pipecat-ai[webrtc]==0.0.104
 SQLAlchemy==2.0.46
 typing-inspection==0.4.2
 typing_extensions==4.15.0

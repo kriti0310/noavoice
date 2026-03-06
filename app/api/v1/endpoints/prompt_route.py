@@ -38,17 +38,3 @@ async def update_prompt(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=result.get("message"))
 
     return result["data"]
-
-
-@router.delete("/{agent_id}/prompt", status_code=status.HTTP_200_OK)
-async def delete_prompt(
-    agent_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    result = await AgentService(db).delete_prompt(agent_id, current_user)
-
-    if not result.get("status"):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=result.get("message"))
-
-    return result

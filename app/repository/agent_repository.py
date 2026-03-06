@@ -52,15 +52,14 @@ class AgentRepository:
 
     # update agent
     async def update(self, agent: Agent, data: AgentUpdate) -> Agent:
-        if data.name is not None:
-            agent.name = data.name
+        update_data = data.model_dump(exclude_unset=True)
 
-        if data.description is not None:
-            agent.description = data.description
-
+        for field, value in update_data.items():
+            setattr(agent, field, value)
 
         await self.db.commit()
         await self.db.refresh(agent)
+
         return agent
 
     # SOFT DELETE
@@ -89,22 +88,4 @@ class AgentRepository:
 
         return agent
 
-    # DELETE PROMPT
-    async def delete_prompt(self, agent_id: UUID):
-
-        result = await self.db.execute(
-            select(Agent).where(Agent.id == agent_id)
-        )
-        agent = result.scalar_one_or_none()
-
-        if not agent:
-            return None
-
-        agent.first_message = None
-        agent.system_prompt = None
-        agent.end_call_message = None
-
-        await self.db.commit()
-        await self.db.refresh(agent)
-
-        return agent
+    
