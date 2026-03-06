@@ -2,6 +2,7 @@ from fastapi import APIRouter,Depends,Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.utils.oauth import oauth
+import os
 from app.config.database import get_db
 from app.models.oauth import OAuthAccount
 from app.models.user import User
@@ -17,7 +18,8 @@ async def google_login(request: Request):
     Initiates the Google OAuth flow.
     Redirects the user to Google's consent screen.
     """
-    redirect_uri = request.url_for("google_callback")
+    #redirect_uri = request.url_for("google_callback")
+    redirect_uri = f"{os.getenv('BASE_URL')}/auth/google/callback"
     print(f"DEBUG redirect_uri: {redirect_uri}") 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 

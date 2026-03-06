@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str
 
     ELEVEN_LABS_API_KEY: str
+
+    BASE_URL: str
     class Config:
         env_file = ".env"
         case_sensitive = True
