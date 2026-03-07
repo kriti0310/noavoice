@@ -14,15 +14,7 @@ import io
 router = APIRouter(prefix="/configure", tags=["Configure"])
 
 @router.get("/{agent_id}/voices")
-async def get_voices(agent_id: UUID, db: AsyncSession = Depends(get_db)):
-
-    result = await db.execute(
-        select(Agent).where(Agent.id == agent_id, Agent.is_deleted == False)
-    )
-    agent = result.scalar_one_or_none()
-
-    if not agent:
-        raise HTTPException(status_code=404, detail="Agent not found")
+async def get_voices(db: AsyncSession = Depends(get_db)):
     
     service = ElevenLabsService()
 
