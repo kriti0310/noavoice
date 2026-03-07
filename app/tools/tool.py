@@ -309,6 +309,57 @@ async def book_appointment(
         return f"Sorry, I couldn't complete the booking. Please try again. Error: {str(e)}"
 
 
+# async def get_booking(
+#     booking_uid: str = None,
+#     email: str = None
+# ) -> str:
+#     """Get booking details by UID or email"""
+#     try:
+#         if booking_uid:
+#             logger.info(f"🔍 Getting booking: {booking_uid}")
+#             latest_uid = await _resolve_latest_uid(booking_uid)
+
+#             result = await calcom_client.get_booking(booking_uid)
+
+#             if result.get("status") != "success":
+#                 return f"No booking found with ID: {booking_uid}"
+
+#             data = result.get("data", {})
+#             return _format_booking_details(data)
+
+#         elif email:
+#             logger.info(f"🔍 Getting bookings for email: {email}")
+#             result = await calcom_client.get_bookings_by_email(email)
+
+#             if result.get("status") != "success":
+#                 return f"No bookings found for email: {email}"
+
+#             bookings = result.get("data", [])
+
+#             if not bookings:
+#                 return f"No appointments found for {email}."
+
+#             active = [
+#                 b for b in bookings
+#                 if b.get("status") in ["accepted", "pending"]
+#             ]
+
+#             if not active:
+#                 return f"No upcoming appointments found for {email}."
+
+#             response = f"Found {len(active)} upcoming appointment(s) for {email}:\n\n"
+#             for booking in active[:3]:
+#                 response += _format_booking_details(booking) + "\n\n"
+
+#             return response
+
+#         else:
+#             return "Please provide a booking ID or email address to look up appointments."
+
+#     except Exception as e:
+#         logger.error(f"❌ Error getting booking: {e}", exc_info=True)
+#         return f"Sorry, I couldn't retrieve the booking. Error: {str(e)}"
+
 async def get_booking(
     booking_uid: str = None,
     email: str = None
@@ -317,12 +368,26 @@ async def get_booking(
     try:
         if booking_uid:
             logger.info(f"🔍 Getting booking: {booking_uid}")
-            result = await calcom_client.get_booking(booking_uid)
+
+            # ✅ Resolve rescheduled chain inline
+            current_uid = booking_uid
+            visited = set()
+            for _ in range(5):
+                if current_uid in visited:
+                    break
+                visited.add(current_uid)
+                result = await calcom_client.get_booking(current_uid)
+                data = result.get("data", {})
+                next_uid = data.get("rescheduledTo") or data.get("fromReschedule")
+                if data.get("status") == "rescheduled" and next_uid:
+                    logger.info(f"🔄 {current_uid} → {next_uid}")
+                    current_uid = next_uid
+                else:
+                    break
 
             if result.get("status") != "success":
                 return f"No booking found with ID: {booking_uid}"
 
-            data = result.get("data", {})
             return _format_booking_details(data)
 
         elif email:
@@ -333,14 +398,32 @@ async def get_booking(
                 return f"No bookings found for email: {email}"
 
             bookings = result.get("data", [])
-
             if not bookings:
                 return f"No appointments found for {email}."
 
-            active = [
-                b for b in bookings
-                if b.get("status") in ["accepted", "pending"]
-            ]
+            # ✅ For each booking, resolve rescheduled chain inline
+            active = []
+            seen = set()
+            for b in bookings:
+                current_uid = b["uid"]
+                visited = set()
+                for _ in range(5):
+                    if current_uid in visited:
+                        break
+                    visited.add(current_uid)
+                    fresh = await calcom_client.get_booking(current_uid)
+                    b = fresh.get("data", b)
+                    next_uid = b.get("rescheduledTo") or b.get("fromReschedule")
+                    if b.get("status") == "rescheduled" and next_uid:
+                        logger.info(f"🔄 {current_uid} → {next_uid}")
+                        current_uid = next_uid
+                    else:
+                        break
+
+                # Only keep active, deduplicated bookings
+                if b.get("status") in ("accepted", "pending") and b["uid"] not in seen:
+                    seen.add(b["uid"])
+                    active.append(b)
 
             if not active:
                 return f"No upcoming appointments found for {email}."
